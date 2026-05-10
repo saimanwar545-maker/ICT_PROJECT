@@ -1,0 +1,99 @@
+import streamlit as st
+import pandas as pd
+
+# --- Page Configuration ---
+st.set_page_config(page_title="Mechanical Engineering Hub", page_icon="⚙️")
+
+# --- Header Section ---
+st.title("⚙️ Mechanical Unit Converter & Material Density Checker")
+st.markdown("### **Developer: Saim Anwar**")
+st.markdown("### **Roll Number: 25-ME-107**")
+st.divider()
+
+# --- Tabs for the App ---
+tab1, tab2 = st.tabs(["🔄 Unit Converter", "🧱 Material Density Checker"])
+
+# --- TAB 1: Unit Converter ---
+with tab1:
+    st.header("Unit Converter")
+    category = st.selectbox("Select Category", ["Force", "Pressure / Stress", "Length"])
+
+    if category == "Force":
+        val = st.number_input("Enter Value:", value=1.0)
+        col1, col2 = st.columns(2)
+        with col1:
+            from_unit = st.selectbox("From:", ["Newtons (N)", "Pounds-force (lbf)"])
+        with col2:
+            to_unit = st.selectbox("To:", ["Pounds-force (lbf)", "Newtons (N)"])
+        
+        if from_unit == "Newtons (N)" and to_unit == "Pounds-force (lbf)":
+            st.success(f"**{val} N** = **{val * 0.224809:.4f} lbf**")
+        elif from_unit == "Pounds-force (lbf)" and to_unit == "Newtons (N)":
+            st.success(f"**{val} lbf** = **{val * 4.44822:.4f} N**")
+        else:
+            st.success(f"**{val} {from_unit}** = **{val} {to_unit}**")
+
+    elif category == "Pressure / Stress":
+        val = st.number_input("Enter Value:", value=1.0)
+        col1, col2 = st.columns(2)
+        units = ["Pascals (Pa)", "Megapascals (MPa)", "psi", "bar"]
+        with col1:
+            from_unit = st.selectbox("From:", units, index=1)
+        with col2:
+            to_unit = st.selectbox("To:", units, index=2)
+            
+        # Conversion factors to Pascals
+        pa_factors = {
+            "Pascals (Pa)": 1,
+            "Megapascals (MPa)": 1e6,
+            "psi": 6894.76,
+            "bar": 100000
+        }
+        
+        # Convert input to Pascals first, then to target unit
+        val_in_pa = val * pa_factors[from_unit]
+        final_val = val_in_pa / pa_factors[to_unit]
+        st.success(f"**{val} {from_unit}** = **{final_val:.4f} {to_unit}**")
+
+    elif category == "Length":
+        val = st.number_input("Enter Value:", value=1.0)
+        col1, col2 = st.columns(2)
+        units = ["Millimeters (mm)", "Meters (m)", "Inches (in)"]
+        with col1:
+            from_unit = st.selectbox("From:", units, index=0)
+        with col2:
+            to_unit = st.selectbox("To:", units, index=2)
+            
+        m_factors = {"Millimeters (mm)": 0.001, "Meters (m)": 1, "Inches (in)": 0.0254}
+        val_in_m = val * m_factors[from_unit]
+        final_val = val_in_m / m_factors[to_unit]
+        st.success(f"**{val} {from_unit}** = **{final_val:.4f} {to_unit}**")
+
+# --- TAB 2: Material Density Checker ---
+with tab2:
+    st.header("Material Density Checker")
+    st.write("Select a material to view its typical density properties.")
+    
+    # Dictionary of materials including common metals and composites
+    materials_data = {
+        "Steel (Mild)": {"Density (kg/m³)": 7850, "Density (g/cm³)": 7.85, "Density (lb/in³)": 0.284},
+        "Aluminum (6061-T6)": {"Density (kg/m³)": 2700, "Density (g/cm³)": 2.70, "Density (lb/in³)": 0.098},
+        "Titanium (Ti-6Al-4V)": {"Density (kg/m³)": 4430, "Density (g/cm³)": 4.43, "Density (lb/in³)": 0.160},
+        "Carbon Fiber Reinforced Polymer (CFRP)": {"Density (kg/m³)": 1600, "Density (g/cm³)": 1.60, "Density (lb/in³)": 0.058},
+        "Copper": {"Density (kg/m³)": 8960, "Density (g/cm³)": 8.96, "Density (lb/in³)": 0.324},
+        "Cast Iron": {"Density (kg/m³)": 7200, "Density (g/cm³)": 7.20, "Density (lb/in³)": 0.260},
+        "Brass": {"Density (kg/m³)": 8530, "Density (g/cm³)": 8.53, "Density (lb/in³)": 0.308}
+    }
+    
+    material_list = list(materials_data.keys())
+    selected_material = st.selectbox("Select Material:", material_list)
+    
+    # Display the data for the selected material
+    data = materials_data[selected_material]
+    
+    col1, col2, col3 = st.columns(3)
+    col1.metric(label="kg/m³", value=f"{data['Density (kg/m³)']}")
+    col2.metric(label="g/cm³", value=f"{data['Density (g/cm³)']}")
+    col3.metric(label="lb/in³", value=f"{data['Density (lb/in³)']}")
+    
+    st.info(f"💡 **Engineering Note:** {selected_material} is highly relevant for mechanical design. Always verify specific manufacturer datasheets for exact material properties, as alloying elements and manufacturing processes can alter actual density.")
